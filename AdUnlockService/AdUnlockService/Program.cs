@@ -5,6 +5,9 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
 
+// Configure Log4Net
+[assembly: log4net.Config.XmlConfigurator(Watch = true)]
+
 namespace AdUnlockService
 {
     static class Program

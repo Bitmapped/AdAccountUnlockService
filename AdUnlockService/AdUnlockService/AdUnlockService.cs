@@ -10,6 +10,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AdAspNetProvider.ActiveDirectory.Service;
+using log4net;
+using log4net.Config;
 
 namespace AdUnlockService
 {
@@ -19,6 +21,11 @@ namespace AdUnlockService
         /// Store configuration settings.
         /// </summary>
         private ConfigSettings config = new ConfigSettings();
+
+        /// <summary>
+        /// Log4Net instance.
+        /// </summary>
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Flags for service status.
@@ -33,7 +40,6 @@ namespace AdUnlockService
             // Initialize variables for state.
             this.stopping = new ManualResetEvent(true);
             this.stoppedEvent = new ManualResetEvent(false);
-
         }
 
         /// <summary>
@@ -52,6 +58,7 @@ namespace AdUnlockService
         {
             // Write status message.
             Console.WriteLine("Starting AdUnlockService");
+            log.Info("Starting AdUnlockService");
 
             // Initialize configuration.
             this.config.LoadSettings();
@@ -81,6 +88,8 @@ namespace AdUnlockService
             // Loop execution.
             while (!this.stopping.WaitOne(0))
             {
+                log.Debug("Beginning unlock cycle.");
+
                 // Unlock accounts.
                 foreach (var unlockAccount in this.config.UnlockAccounts)
                 {
@@ -98,11 +107,12 @@ namespace AdUnlockService
                             {
                                 // Unlock account.
                                 account.UnlockAccount();
-
+                                log.Info(unlockAccount + " has been unlocked at " + DateTime.Now.ToString());
                                 Console.WriteLine(unlockAccount + " has been unlocked at " + DateTime.Now.ToString());
                             }
                             else
                             {
+                                log.Debug(unlockAccount + " was already unlocked at " + DateTime.Now.ToString());
                                 Console.WriteLine(unlockAccount + " was already unlocked at " + DateTime.Now.ToString());
                             }
 
@@ -112,6 +122,8 @@ namespace AdUnlockService
                     }
                     catch { }
                 }
+
+                log.Debug("Ending unlock cycle.  Waiting for next cycle to begin.");
 
                 // Sleep for specified time or signal is received.
                 this.stopping.WaitOne(this.config.UnlockFrequency * 1000);
@@ -128,6 +140,7 @@ namespace AdUnlockService
         {
             // Write status message.
             Console.WriteLine("Stopping AdUnlockService");
+            log.Info("Stopping AdUnlockService");
 
             // Set service stopping flag.
             this.stopping.Set();
