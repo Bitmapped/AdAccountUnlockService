@@ -6,5 +6,5 @@ This project is a Windows service that will automatically unlock specified Activ
 
 ## Usage instructions
 1. Download and run the provided installer. Follow its instructions to configure the service.
-2. Configure the file **%ProgramData%\AdUnlockService\App.config** as desired.
+2. Configure the file **%ProgramFiles(x86)%\AdUnlockService\AdUnlockService.exe.config** as desired.
 3. Start the **AdUnlockService** service.
